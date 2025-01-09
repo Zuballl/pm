@@ -1,58 +1,58 @@
-import datetime as _dt
+import datetime as dt
+import pydantic
+import typing
 
-import pydantic as _pydantic
-import typing as _typing
 
-
-class _UserBase(_pydantic.BaseModel):
+class UserBase(pydantic.BaseModel):
     username: str
 
 
-class UserCreate(_UserBase):
+class UserCreate(UserBase):
     hashed_password: str
 
     class Config:
         from_attributes = True
 
 
-class User(_UserBase):
+class User(UserBase):
     id: int
 
     class Config:
         from_attributes = True
 
 
-class _ProjectBase(_pydantic.BaseModel):
+class ProjectBase(pydantic.BaseModel):
     name: str
     department: str
     client: str
     deadline: str
     description: str
+    clickup_list_id: typing.Optional[str] = None 
 
 
-class ProjectCreate(_ProjectBase):
+class ProjectCreate(ProjectBase):
     pass
 
 
-class Project(_ProjectBase):
+class Project(ProjectBase):
     id: int
     owner_id: int
-    date_created: _dt.datetime
-    date_last_updated: _dt.datetime
+    date_created: dt.datetime
+    date_last_updated: dt.datetime
 
     class Config:
         from_attributes = True
 
 
 
-class GPTQueryRequest(_pydantic.BaseModel):
+class GPTQueryRequest(pydantic.BaseModel):
     query: str
-    project_id: _typing.Optional[int] = None
+    project_id: typing.Optional[int] = None
 
     class Config:
         from_attributes = True
 
-class GPTQueryResponse(_pydantic.BaseModel):
+class GPTQueryResponse(pydantic.BaseModel):
     response: str
 
     class Config:
@@ -61,19 +61,40 @@ class GPTQueryResponse(_pydantic.BaseModel):
 
 
 
-class ChatCreateRequest(_pydantic.BaseModel):
+class ChatCreateRequest(pydantic.BaseModel):
     query: str
     response: str
-    project_id: _typing.Optional[int] = None
+    project_id: typing.Optional[int] = None
 
-class ChatResponse(_pydantic.BaseModel):
+class ChatResponse(pydantic.BaseModel):
     id: int
     query: str
     response: str
-    project_id: _typing.Optional[int]
+    project_id: typing.Optional[int]
 
     class Config:
         from_attributes = True
 
-class ChatListResponse(_pydantic.BaseModel):
-    chats: _typing.List[ChatResponse]
+class ChatListResponse(pydantic.BaseModel):
+    chats: typing.List[ChatResponse]
+
+
+
+class ClickUpTokenCreate(pydantic.BaseModel):
+    api_token: str
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

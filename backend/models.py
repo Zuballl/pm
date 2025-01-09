@@ -1,51 +1,69 @@
-import datetime as _dt
+import datetime as dt
 
-import sqlalchemy as _sql
-import sqlalchemy.orm as _orm
-import passlib.hash as _hash
+import sqlalchemy as sql
+import sqlalchemy.orm as orm
+import passlib.hash as hash
 
-import database as _database
+import database
 
 
 
-class User(_database.Base):
+class User(database.Base):
     __tablename__ = "users"
-    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
-    username = _sql.Column(_sql.String, unique=True, index=True)
-    hashed_password = _sql.Column(_sql.String)
+    id = sql.Column(sql.Integer, primary_key=True, index=True)
+    username = sql.Column(sql.String, unique=True, index=True)
+    hashed_password = sql.Column(sql.String)
 
-    projects = _orm.relationship("Project", back_populates="owner")
-    chat_history = _orm.relationship("ChatHistory", back_populates="user")
+    projects = orm.relationship("Project", back_populates="owner")
+    chat_history = orm.relationship("ChatHistory", back_populates="user")
+    clickup_token = orm.relationship("ClickUpToken", back_populates="user")
+
 
     def verify_password(self, password: str):
-        return _hash.bcrypt.verify(password, self.hashed_password)
+        return hash.bcrypt.verify(password, self.hashed_password)
 
-
-class Project(_database.Base):
+class Project(database.Base):
     __tablename__ = "projects"
-    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
-    owner_id = _sql.Column(_sql.Integer, _sql.ForeignKey("users.id"))
-
-    name = _sql.Column(_sql.String, index=True)
-    department = _sql.Column(_sql.String, index=True)
-    client = _sql.Column(_sql.String, index=True)
-    deadline = _sql.Column(_sql.String, index=True, default="")
-    description = _sql.Column(_sql.String, default="")
-
-    date_created = _sql.Column(_sql.DateTime, default=_dt.datetime.utcnow)
-    date_last_updated = _sql.Column(_sql.DateTime, default=_dt.datetime.utcnow)
-
-    owner = _orm.relationship("User", back_populates="projects")
+    id = sql.Column(sql.Integer, primary_key=True, index=True)
+    owner_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
+    clickup_list_id = sql.Column(sql.String, nullable=True) 
 
 
+    name = sql.Column(sql.String, index=True)
+    department = sql.Column(sql.String, index=True)
+    client = sql.Column(sql.String, index=True)
+    deadline = sql.Column(sql.String, index=True, default="")
+    description = sql.Column(sql.String, default="")
 
-class ChatHistory(_database.Base):
+    date_created = sql.Column(sql.DateTime, default=dt.datetime.utcnow)
+    date_last_updated = sql.Column(sql.DateTime, default=dt.datetime.utcnow)
+
+    owner = orm.relationship("User", back_populates="projects")
+
+
+class ChatHistory(database.Base):
     __tablename__ = "chat_history"
 
-    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
-    user_id = _sql.Column(_sql.Integer, _sql.ForeignKey("users.id"))
-    project_id = _sql.Column(_sql.Integer, nullable=True)  
-    query = _sql.Column(_sql.Text, nullable=False)
-    response = _sql.Column(_sql.Text, nullable=False)
+    id = sql.Column(sql.Integer, primary_key=True, index=True)
+    user_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
+    project_id = sql.Column(sql.Integer, nullable=True)  
+    query = sql.Column(sql.Text, nullable=False)
+    response = sql.Column(sql.Text, nullable=False)
 
-    user = _orm.relationship("User", back_populates="chat_history")
+    user = orm.relationship("User", back_populates="chat_history")
+
+
+
+class ClickUpToken(database.Base):
+    __tablename__ = "clickup_token"
+    id = sql.Column(sql.Integer, primary_key=True, index=True)
+    user_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
+    api_token = sql.Column(sql.String, nullable=False)
+
+    user = orm.relationship("User", back_populates="clickup_token")
+
+
+
+
+
+

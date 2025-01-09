@@ -1,12 +1,29 @@
-import sqlalchemy as _sql
-import sqlalchemy.ext.declarative as _declarative
-import sqlalchemy.orm as _orm
+import sqlalchemy as sql
+import sqlalchemy.ext.declarative as declarative
+import sqlalchemy.orm as orm
+import fastapi.security as security
+
 
 DATABASE_URL = "sqlite:///./inz.db"
 
-engine = _sql.create_engine(DATABASE_URL)
+engine = sql.create_engine(DATABASE_URL)
 
-SessionLocal = _orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = _declarative.declarative_base()
+Base = declarative.declarative_base()
 
+oauth2schema = security.OAuth2PasswordBearer(tokenUrl="/api/token")
+
+JWT_SECRET = "myjwtsecret"
+
+
+def create_database():
+    return Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -121,7 +121,7 @@ const ChatPanel = ({ token, userId }) => {
             }}
         >
           {chatHistory.length === 0 ? (
-            <p>No chat history available.</p>
+            <p>No chat history available, start now!</p>
           ) : (
             <ul>
               {chatHistory.map((chat, index) => (
