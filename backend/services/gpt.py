@@ -6,7 +6,7 @@ import os
 import re
 
 import models
-from services import clickup as services_clickup
+from services import clickup as services_clickup, slack as services_slack
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -43,8 +43,14 @@ async def get_gpt_response(
         # Check if the query is ClickUp-related
         if "clickup" in query.lower():
             if not project_id:
-                return "Please specify a project to associate this ClickUp task."
+                return "Please specify a project to associate this ClickUp operation."
             return await services_clickup.handle_clickup_task(db, query, user_id, project_id)
+
+        if "slack" in query.lower():
+            if not project_id:
+                return "Please specify a project to associate this Slack operation."
+            return await services_slack.handle_slack_message(db, query, project_id)
+
 
         # Handle standard GPT response
         system_message = f"Context: {project_context}" if project_context else "General Query"

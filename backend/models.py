@@ -22,11 +22,13 @@ class User(database.Base):
     def verify_password(self, password: str):
         return hash.bcrypt.verify(password, self.hashed_password)
 
+
 class Project(database.Base):
     __tablename__ = "projects"
     id = sql.Column(sql.Integer, primary_key=True, index=True)
     owner_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
     clickup_list_id = sql.Column(sql.String, nullable=True) 
+    slack_integration = orm.relationship("SlackIntegration", back_populates="project", uselist=False)  # Update this
 
 
     name = sql.Column(sql.String, index=True)
@@ -39,6 +41,7 @@ class Project(database.Base):
     date_last_updated = sql.Column(sql.DateTime, default=dt.datetime.utcnow)
 
     owner = orm.relationship("User", back_populates="projects")
+
 
 
 class ChatHistory(database.Base):
@@ -64,6 +67,13 @@ class ClickUpToken(database.Base):
 
 
 
+class SlackIntegration(database.Base):
+    __tablename__ = "slack_integration"
+    id = sql.Column(sql.Integer, primary_key=True, index=True)
+    client_id = sql.Column(sql.String, nullable=False)
+    client_secret = sql.Column(sql.String, nullable=False)
+    redirect_uri = sql.Column(sql.String, nullable=False)
+    access_token = sql.Column(sql.String, nullable=True)
 
-
-
+    project_id = sql.Column(sql.Integer, sql.ForeignKey("projects.id"), nullable=False)
+    project = orm.relationship("Project", back_populates="slack_integration")

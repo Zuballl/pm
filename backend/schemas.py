@@ -28,6 +28,7 @@ class ProjectBase(pydantic.BaseModel):
     deadline: str
     description: str
     clickup_list_id: typing.Optional[str] = None 
+    slack_integration: typing.Optional[int] = None
 
 
 class ProjectCreate(ProjectBase):
@@ -85,7 +86,22 @@ class ClickUpTokenCreate(pydantic.BaseModel):
 
 
 
+class SlackIntegrationBase(pydantic.BaseModel):
+    client_id: str
+    client_secret: str
+    redirect_uri: str
 
+
+class SlackIntegrationCreate(SlackIntegrationBase):
+    pass
+
+
+class SlackIntegrationResponse(SlackIntegrationBase):
+    id: int
+    access_token: typing.Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 

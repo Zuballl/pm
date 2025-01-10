@@ -5,3 +5,4 @@ pydantic
 PyJWT
 SQLAlchemy
 openai
+brew install ngrok
