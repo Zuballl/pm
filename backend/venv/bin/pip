@@ -1,4 +1,4 @@
-#!/Users/janzubalewicz/Documents/pm/backend/venv/bin/python3.11
+#!/Users/janzubalewicz/Documents/pm/backend/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -44,7 +44,7 @@ async def get_gpt_response(
         if "clickup" in query.lower():
             if not project_id:
                 return "Please specify a project to associate this ClickUp operation."
-            return await services_clickup.handle_clickup_task(db, query, user_id, project_id)
+            return await services_clickup.handle_clickup_task(db, query, project_id)
 
         if "slack" in query.lower():
             if not project_id:

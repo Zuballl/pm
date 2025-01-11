@@ -5,28 +5,95 @@ import json
 import datetime as dt
 
 import models
+import schemas
 from services import gpt as services_gpt
 
 
-def save_clickup_token(db: orm.Session, user_id: int, api_token: str):
-    token = models.ClickUpToken(user_id=user_id, api_token=api_token)
-    db.add(token)
-    db.commit()
-    db.refresh(token)
-    return token
 
 
-def get_clickup_token(db: orm.Session, user_id: int):
-    return db.query(models.ClickUpToken).filter(models.ClickUpToken.user_id == user_id).first()
+def connect_project_to_clickup(db: orm.Session, project_id: int, user: models.User, api_token: str, list_id: str):
+    """
+    Save or update the ClickUp integration (token and list ID) for a specific project.
+    Filters projects by the logged-in user.
+    """
+    # Query the project and ensure it belongs to the current user
+    project = (
+        db.query(models.Project)
+        .filter(models.Project.id == project_id, models.Project.owner_id == user.id)
+        .first()
+    )
 
-
-def associate_list_with_project(db: orm.Session, user_id: int, project_id: int, list_id: str):
-    project = db.query(models.Project).filter(models.Project.id == project_id, models.Project.owner_id == user_id).first()
     if not project:
         raise fastapi.HTTPException(status_code=404, detail="Project not found or unauthorized access")
-    project.clickup_list_id = list_id
+
+    # Check if integration already exists
+    if project.clickup_integration:
+        # Update the existing integration
+        project.clickup_integration.api_token = api_token
+        project.clickup_integration.list_id = list_id
+    else:
+        # Create a new integration
+        integration = models.ClickUpIntegration(
+            project_id=project_id,
+            api_token=api_token,
+            list_id=list_id,
+        )
+        db.add(integration)
+
     db.commit()
+    db.refresh(project)
     return project
+
+
+
+
+
+# Get ClickUp Integration for a Project
+def get_clickup_integration(db: orm.Session, project_id: int):
+    """
+    Fetch the ClickUp integration for a specific project.
+    """
+    return (
+        db.query(models.ClickUpIntegration)
+        .filter(models.ClickUpIntegration.project_id == project_id)
+        .first()
+    )
+
+
+
+
+def get_clickup_token(db: orm.Session, project_id: int):
+    """
+    Retrieve the ClickUp API token for a specific project.
+
+    Args:
+        db (orm.Session): Database session.
+        project_id (int): The ID of the project.
+
+    Returns:
+        models.ClickUpIntegration: The ClickUp integration for the project, or None if not found.
+    """
+    integration = (
+        db.query(models.ClickUpIntegration)
+        .filter(models.ClickUpIntegration.project_id == project_id)
+        .first()
+    )
+    if not integration:
+        raise fastapi.HTTPException(
+            status_code=404, detail=f"No ClickUp integration found for project {project_id}"
+        )
+    return integration
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -180,7 +247,7 @@ def format_due_date(due_date_ms):
 
 
 
-async def handle_clickup_task(db: orm.Session, query: str, user_id: int, project_id: int) -> str:
+async def handle_clickup_task(db: orm.Session, query: str, project_id: int) -> str:
     try:
         # Use GPT to parse the query and determine the action
         system_message = (
@@ -211,36 +278,28 @@ async def handle_clickup_task(db: orm.Session, query: str, user_id: int, project
         except json.JSONDecodeError:
             return "Failed to parse task details. Please provide a clearer query."
 
-        # Fetch ClickUp token
-        clickup_token = get_clickup_token(db, user_id)
-        if not clickup_token:
-            return "You have not provided your ClickUp API token. Please add it first."
-
-        # Fetch associated ClickUp list from the project
-        project = db.query(models.Project).filter(
-            models.Project.id == project_id, models.Project.owner_id == user_id
-        ).first()
-
-        if not project or not project.clickup_list_id:
-            return "No ClickUp list is associated with this project. Please set one up."
+        # Fetch ClickUp token and list details for the project
+        clickup_integration = get_clickup_token(db, project_id)
+        api_token = clickup_integration.api_token
+        list_id = clickup_integration.list_id
 
         # Handle actions
         if action == "add":
             add_task_to_clickup(
-                api_token=clickup_token.api_token,
-                list_id=project.clickup_list_id,
+                api_token=api_token,
+                list_id=list_id,
                 task_name=task_name,
                 description=description,
                 due_date=due_date,
             )
-            return f"Task '{task_name}' with description '{description or 'None'}' and deadline '{due_date or 'None'}' has been added to the ClickUp list associated with project {project.name}."
+            return f"Task '{task_name}' with description '{description or 'None'}' and deadline '{due_date or 'None'}' has been added to the ClickUp list."
 
         elif action in ["update", "delete"]:
             # Fetch task ID by name if not provided
             if not task_id:
                 task = get_task_by_name(
-                    api_token=clickup_token.api_token,
-                    list_id=project.clickup_list_id,
+                    api_token=api_token,
+                    list_id=list_id,
                     task_name=task_name,
                 )
                 task_id = task["id"]
@@ -256,42 +315,31 @@ async def handle_clickup_task(db: orm.Session, query: str, user_id: int, project
                     ),
                 }
                 updates = {k: v for k, v in updates.items() if v is not None}  # Remove None values
-                update_task_in_clickup(
-                    api_token=clickup_token.api_token, task_id=task_id, updates=updates
-                )
+                update_task_in_clickup(api_token=api_token, task_id=task_id, updates=updates)
                 return f"Task '{task_name}' has been updated successfully."
 
             elif action == "delete":
-                delete_task_from_clickup(api_token=clickup_token.api_token, task_id=task_id)
+                delete_task_from_clickup(api_token=api_token, task_id=task_id)
                 return f"Task '{task_name}' has been deleted successfully."
 
         elif action == "get":
             # Fetch task by name if task_id is not provided
             if not task_id:
                 task = get_task_by_name(
-                    api_token=clickup_token.api_token,
-                    list_id=project.clickup_list_id,
+                    api_token=api_token,
+                    list_id=list_id,
                     task_name=task_name,
                 )
                 task_id = task["id"]
-            task = get_task_from_clickup(api_token=clickup_token.api_token, task_id=task_id)
+            task = get_task_from_clickup(api_token=api_token, task_id=task_id)
             return f"Task Details:\n{json.dumps(task, indent=2)}"
 
         elif action == "get_all":
-            tasks = get_all_tasks_from_clickup(api_token=clickup_token.api_token, list_id=project.clickup_list_id)
-            formatted_tasks = format_task_list_response(tasks, project.name)
-            return f"All Tasks in Project '{project.name}':\n\n{formatted_tasks}"
+            tasks = get_all_tasks_from_clickup(api_token=api_token, list_id=list_id)
+            formatted_tasks = format_task_list_response(tasks, f"Project {project_id}")
+            return f"All Tasks in Project {project_id}:\n\n{formatted_tasks}"
         else:
             return "Invalid action. Please specify 'add', 'update', 'delete', 'get', or 'get_all'."
 
     except Exception as e:
         return f"Error handling ClickUp task: {str(e)}"
-
-
-
-
-
-
-
-
-

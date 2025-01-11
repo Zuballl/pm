@@ -1,28 +1,26 @@
 import fastapi
 import sqlalchemy.orm as orm
 
-from services import users as services_users, clickup as services_clickup
 import schemas
+import models
 import database
+from services import clickup as services_clickup, users as services_users
 
 router = fastapi.APIRouter()
 
-@router.post("/api/clickup/token")
-def add_clickup_token(
-    token: schemas.ClickUpTokenCreate,
-    db: orm.Session = fastapi.Depends(database.get_db),
-    user=fastapi.Depends(services_users.get_current_user),
-):
-    services_clickup.save_clickup_token(db, user.id, token.api_token)
-    return {"message": "ClickUp API token saved successfully"}
-
-
-@router.post("/api/projects/{project_id}/clickup-list")
-def associate_clickup_list(
+@router.post("/api/projects/{project_id}/clickup")
+def connect_project_to_clickup(
     project_id: int,
-    list_id: str,
+    data: schemas.ClickUpConnect,
     db: orm.Session = fastapi.Depends(database.get_db),
-    user=fastapi.Depends(services_users.get_current_user),
+    current_user: models.User = fastapi.Depends(services_users.get_current_user),
 ):
-    services_clickup.associate_list_with_project(db, user.id, project_id, list_id)
-    return {"message": f"ClickUp list {list_id} associated with project {project_id}"}
+
+    services_clickup.connect_project_to_clickup(
+        db=db, 
+        project_id=project_id, 
+        user=current_user, 
+        api_token=data.api_token, 
+        list_id=data.list_id
+    )
+    return {"message": f"Project {project_id} successfully connected to ClickUp"}

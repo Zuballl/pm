@@ -1,7 +1,7 @@
 import fastapi as fastapi
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, projects, gpt, clickup, slack
+from routers import users, projects, gpt, clickup, slack, google_drive
 
 
 
@@ -16,11 +16,12 @@ app.add_middleware(
 )
 
 
-app.include_router(users.router)
-app.include_router(projects.router)
-app.include_router(gpt.router)
-app.include_router(clickup.router)
-app.include_router(slack.router)
+app.include_router(users.router, tags=["Users"])
+app.include_router(projects.router, tags=["Projects"])
+app.include_router(gpt.router, tags=["GPT"])
+app.include_router(clickup.router, tags=["Clickup"])
+app.include_router(slack.router, tags=["Slack"])
+app.include_router(google_drive.router, tags=["Google Drive"])
 
 
 

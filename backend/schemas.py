@@ -21,28 +21,6 @@ class User(UserBase):
         from_attributes = True
 
 
-class ProjectBase(pydantic.BaseModel):
-    name: str
-    department: str
-    client: str
-    deadline: str
-    description: str
-    clickup_list_id: typing.Optional[str] = None 
-    slack_integration: typing.Optional[int] = None
-
-
-class ProjectCreate(ProjectBase):
-    pass
-
-
-class Project(ProjectBase):
-    id: int
-    owner_id: int
-    date_created: dt.datetime
-    date_last_updated: dt.datetime
-
-    class Config:
-        from_attributes = True
 
 
 
@@ -81,8 +59,38 @@ class ChatListResponse(pydantic.BaseModel):
 
 
 
+
+
+
+
+
+
+class ClickUpConnect(pydantic.BaseModel):
+    api_token: str
+    list_id: str
+
 class ClickUpTokenCreate(pydantic.BaseModel):
     api_token: str
+
+
+class ClickUpResponse(pydantic.BaseModel):
+    status: str
+    message: str
+
+
+class ClickUpIntegrationBase(pydantic.BaseModel):
+    api_token: typing.Optional[str] = None
+    list_id: typing.Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+
+
+
+
+
 
 
 
@@ -110,7 +118,53 @@ class SlackIntegrationResponse(SlackIntegrationBase):
 
 
 
+class GoogleDriveBase(pydantic.BaseModel):
+    client_id: str
+    client_secret: str
+    token: str
+
+class GoogleDriveCreate(GoogleDriveBase):
+    pass
+
+class GoogleDriveResponse(GoogleDriveBase):
+    id: int
+    project_id: int
+
+    class Config:
+        from_attributes = True
 
 
 
 
+    
+
+
+
+
+
+
+class ProjectBase(pydantic.BaseModel):
+    name: str
+    department: str
+    client: str
+    deadline: str
+    description: str
+    clickup_integration: typing.Optional[ClickUpIntegrationBase] = None 
+    slack_integration: typing.Optional[SlackIntegrationBase] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ProjectCreate(ProjectBase):
+    pass
+
+
+class Project(ProjectBase):
+    id: int
+    owner_id: int
+    date_created: dt.datetime
+    date_last_updated: dt.datetime
+
+    class Config:
+        from_attributes = True

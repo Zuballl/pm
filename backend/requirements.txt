@@ -1,8 +1,13 @@
 bcrypt
 fastapi
 passlib
+sqlalchemy
 pydantic
 PyJWT
 SQLAlchemy
 openai
-brew install ngrok
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+# brew install ngrok
