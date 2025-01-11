@@ -41,14 +41,12 @@ def get_slack_token(db: orm.Session, project_id: int) -> str:
     return project.slack_integration.access_token
 
 
-def generate_oauth_url(client_id: str, redirect_uri: str) -> str:
-    """
-    Generate the Slack OAuth URL for user authentication.
-    """
+def generate_oauth_url(client_id: str, redirect_uri: str, project_id: int) -> str:
     return (
         f"https://slack.com/oauth/v2/authorize"
         f"?client_id={client_id}&scope=channels:read,chat:write,users:read"
         f"&redirect_uri={redirect_uri}"
+        f"&state={project_id}"
     )
 
 
@@ -273,3 +271,6 @@ async def handle_slack_message(db: orm.Session, query: str, project_id: int) -> 
 
     except Exception as e:
         return f"Error handling Slack message: {str(e)}"
+
+
+

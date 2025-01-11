@@ -90,10 +90,6 @@ class ClickUpIntegrationBase(pydantic.BaseModel):
 
 
 
-
-
-
-
 class SlackIntegrationBase(pydantic.BaseModel):
     client_id: str
     client_secret: str
@@ -150,7 +146,7 @@ class ProjectBase(pydantic.BaseModel):
     deadline: str
     description: str
     clickup_integration: typing.Optional[ClickUpIntegrationBase] = None 
-    slack_integration: typing.Optional[SlackIntegrationBase] = None
+    slack_integration: typing.Optional[SlackIntegrationResponse] = None
 
     class Config:
         from_attributes = True

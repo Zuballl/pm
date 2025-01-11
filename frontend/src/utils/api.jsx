@@ -38,7 +38,6 @@ export const fetchProjects = async (userId, token) => {
   return response.data;
 };
 
-export default api;
 
 export const connectClickUp = async (projectId, apiToken, listId, token) => {
   const response = await api.post(
@@ -56,33 +55,31 @@ export const connectClickUp = async (projectId, apiToken, listId, token) => {
   return response.data;
 };
 
-// Slack API integrations
-export const getSlackOAuthUrl = async (projectId, token) => {
-  const response = await api.get(`/api/projects/${projectId}/slack/connect`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data.url;
-};
-
-export const handleSlackCallback = async (projectId, code, token) => {
-  const response = await api.get(
-    `/api/projects/${projectId}/slack/callback?code=${code}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+// Step 1: Associate Slack with a project
+export const configureSlack = async (projectId, config, token) => {
+  const response = await api.post(
+    `/api/projects/${projectId}/slack/config`,
+    config,
+    { headers: { Authorization: `Bearer ${token}` } }
   );
   return response.data;
 };
 
-export const fetchSlackChannels = async (projectId, token) => {
-  const response = await api.get(`/api/projects/${projectId}/slack/channels`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+// Step 2: Get Slack OAuth URL
+export const getSlackOAuthUrl = async (projectId, token) => {
+  const response = await api.get(`/api/projects/${projectId}/slack/connect`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
+  return response.data.url;
+};
+
+// Step 3: Handle Slack callback
+export const handleSlackCallback = async (projectId, code, token) => {
+  const response = await api.get(
+    `/api/projects/${projectId}/slack/callback?code=${code}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
   return response.data;
 };
+
+export default api;

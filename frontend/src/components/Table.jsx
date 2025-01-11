@@ -3,8 +3,8 @@ import { format } from "date-fns";
 
 import ErrorMessage from "./ErrorMessage";
 import ProjectModal from "./ProjectModal";
-import ClickUpModal from "./ClickUpModal"; 
-import SlackModal from "./SlackModal"; // New Modal Component
+import ClickUpModal from "./ClickUpModal";
+import SlackModal from "./SlackModal"; // Import Slack Modal
 import { UserContext } from "../context/UserContext";
 
 const Table = () => {
@@ -12,26 +12,32 @@ const Table = () => {
   const [projects, setProjects] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
+
   const [activeModal, setActiveModal] = useState(false);
   const [activeClickUpModal, setActiveClickUpModal] = useState(false);
-  const [activeSlackModal, setActiveSlackModal] = useState(false); // State for Slack Modal
+  const [activeSlackModal, setActiveSlackModal] = useState(false); // Slack Modal State
+
   const [id, setId] = useState(null);
 
+  // Function to handle project update modal
   const handleUpdate = async (id) => {
     setId(id);
     setActiveModal(true);
   };
 
+  // Function to handle ClickUp connection modal
   const handleConnectClickUp = async (id) => {
     setId(id);
     setActiveClickUpModal(true);
   };
 
+  // Function to handle Slack connection modal
   const handleConnectSlack = async (id) => {
     setId(id);
     setActiveSlackModal(true);
   };
 
+  // Function to handle project deletion
   const handleDelete = async (id) => {
     const requestOptions = {
       method: "DELETE",
@@ -48,6 +54,7 @@ const Table = () => {
     getProjects();
   };
 
+  // Function to fetch projects from the backend
   const getProjects = async () => {
     const requestOptions = {
       method: "GET",
@@ -66,22 +73,26 @@ const Table = () => {
     }
   };
 
+  // Fetch projects when the component is mounted
   useEffect(() => {
     getProjects();
   }, []);
 
+  // Function to toggle the project update modal
   const handleModal = () => {
     setActiveModal(!activeModal);
     getProjects();
     setId(null);
   };
 
+  // Function to toggle the ClickUp modal
   const handleClickUpModal = () => {
     setActiveClickUpModal(!activeClickUpModal);
     getProjects();
     setId(null);
   };
 
+  // Function to toggle the Slack modal
   const handleSlackModal = () => {
     setActiveSlackModal(!activeSlackModal);
     getProjects();
@@ -90,6 +101,7 @@ const Table = () => {
 
   return (
     <>
+      {/* Project Modal */}
       <ProjectModal
         active={activeModal}
         handleModal={handleModal}
@@ -97,6 +109,7 @@ const Table = () => {
         id={id}
         setErrorMessage={setErrorMessage}
       />
+      {/* ClickUp Modal */}
       <ClickUpModal
         active={activeClickUpModal}
         handleModal={handleClickUpModal}
@@ -104,6 +117,7 @@ const Table = () => {
         projectId={id}
         setErrorMessage={setErrorMessage}
       />
+      {/* Slack Modal */}
       <SlackModal
         active={activeSlackModal}
         handleModal={handleSlackModal}
@@ -111,13 +125,16 @@ const Table = () => {
         projectId={id}
         setErrorMessage={setErrorMessage}
       />
+      {/* Create New Project Button */}
       <button
         className="button is-fullwidth mb-5 is-primary"
         onClick={() => setActiveModal(true)}
       >
         Create New Project
       </button>
+      {/* Error Message */}
       <ErrorMessage message={errorMessage} />
+      {/* Projects Table */}
       {loaded && projects ? (
         <table className="table is-fullwidth">
           <thead>
@@ -139,7 +156,9 @@ const Table = () => {
                 <td>{project.client}</td>
                 <td>{project.deadline}</td>
                 <td>{project.description}</td>
-                <td>{format(new Date(project.date_last_updated), "MMM do yyyy")}</td>
+                <td>
+                  {format(new Date(project.date_last_updated), "MMM do yyyy")}
+                </td>
                 <td>
                   <button
                     className="button mr-2 is-info is-light"

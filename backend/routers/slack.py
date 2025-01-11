@@ -50,21 +50,31 @@ def generate_slack_oauth_url(
     if not slack_integration:
         raise fastapi.HTTPException(status_code=400, detail="Slack configuration not found for this project.")
 
-    return {"url": services_slack.generate_oauth_url(slack_integration.client_id, slack_integration.redirect_uri)}
+    return {
+        "url": services_slack.generate_oauth_url(
+            client_id=slack_integration.client_id,
+            redirect_uri=slack_integration.redirect_uri,
+            project_id=project_id,
+        )
+    }
 
 
-@router.get("/api/projects/{project_id}/slack/callback")
+@router.get("/api/slack/callback")
 def slack_callback(
-    project_id: int,
     code: str,
+    state: str,
     db: orm.Session = fastapi.Depends(database.get_db),
-    user: models.User = fastapi.Depends(services_users.get_current_user),
 ):
     """
-    Handle the Slack OAuth callback for a project.
+    Handle the Slack OAuth callback and use the state parameter to get the project ID.
     """
-    services_slack.handle_slack_callback(code=code, db=db, project_id=project_id)
-    return {"message": "Slack integration completed successfully"}
-
+    try:
+        project_id = int(state)  # Extract project_id from state
+        services_slack.handle_slack_callback(code=code, db=db, project_id=project_id)
+        
+        # Redirect to your app's specific URL after successful integration
+        return fastapi.responses.RedirectResponse(url=f"http://localhost:5173/")
+    except ValueError:
+        raise fastapi.HTTPException(status_code=400, detail="Invalid project ID in state")
 
 
