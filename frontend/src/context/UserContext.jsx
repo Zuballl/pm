@@ -2,13 +2,13 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const UserContext = createContext();
 
-export const UserProvider = (props) => {
+export const UserProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     try {
       return localStorage.getItem("awesomeProjectManager") || null;
     } catch (err) {
-      console.error("LocalStorage is not accessible:", err);
-      return null; // Fallback if localStorage is not accessible
+      console.error("Error accessing localStorage:", err);
+      return null;
     }
   });
 
@@ -20,13 +20,13 @@ export const UserProvider = (props) => {
         localStorage.removeItem("awesomeProjectManager");
       }
     } catch (err) {
-      console.error("Failed to update localStorage:", err);
+      console.error("Error updating localStorage:", err);
     }
   }, [token]);
 
   return (
     <UserContext.Provider value={[token, setToken]}>
-      {props.children}
+      {children}
     </UserContext.Provider>
   );
 };

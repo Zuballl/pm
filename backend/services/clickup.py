@@ -161,17 +161,6 @@ def update_task_in_clickup(api_token: str, task_id: str, updates: dict):
 
 
 def delete_task_from_clickup(api_token: str, task_id: str):
-    """
-    Delete a task from ClickUp.
-
-    Args:
-        api_token (str): ClickUp API token.
-        task_id (str): ID of the ClickUp task to delete.
-
-    Returns:
-        None
-    """
-    
     headers = {"Authorization": api_token}
     response = requests.delete(f"https://api.clickup.com/api/v2/task/{task_id}", headers=headers)
     response.raise_for_status()
@@ -190,16 +179,6 @@ def get_task_by_name(api_token: str, list_id: str, task_name: str) -> dict:
 
 
 def get_all_tasks_from_clickup(api_token: str, list_id: str) -> list:
-    """
-    Fetch all tasks from a specific ClickUp list.
-
-    Args:
-        api_token (str): ClickUp API token.
-        list_id (str): ID of the ClickUp list.
-
-    Returns:
-        list: List of tasks from the ClickUp API.
-    """
     headers = {"Authorization": api_token}
     response = requests.get(f"https://api.clickup.com/api/v2/list/{list_id}/task", headers=headers)
     response.raise_for_status()
@@ -216,9 +195,9 @@ def format_task_list_response(tasks: list, project_name: str) -> str:
 
     formatted_tasks = "\n\n".join(
         [
-            f"Task Name: {task.get('name', 'No Name')},\n"
-            f"Task Description: {task.get('description', 'No Description')},\n"
-            f"Task Due Date: {format_due_date(task.get('due_date'))}."
+            f"Task name: {task.get('name', 'No name')},\n"
+            f"Task description: {task.get('description', 'No description')},\n"
+            f"Task due date: {format_due_date(task.get('due_date'))}."
             for task in tasks
         ]
     )
@@ -234,8 +213,8 @@ def format_due_date(due_date_ms):
             due_date = dt.datetime.fromtimestamp(int(due_date_ms) / 1000).strftime("%Y-%m-%d")
             return due_date
         except (ValueError, TypeError):
-            return "Invalid Due Date"
-    return "No Due Date"
+            return "invalid due date"
+    return "no due date"
 
 
 
@@ -337,7 +316,7 @@ async def handle_clickup_task(db: orm.Session, query: str, project_id: int) -> s
         elif action == "get_all":
             tasks = get_all_tasks_from_clickup(api_token=api_token, list_id=list_id)
             formatted_tasks = format_task_list_response(tasks, f"Project {project_id}")
-            return f"All Tasks in Project {project_id}:\n\n{formatted_tasks}"
+            return f"All Tasks related to project in ClickUp:\n\n{formatted_tasks}"
         else:
             return "Invalid action. Please specify 'add', 'update', 'delete', 'get', or 'get_all'."
 

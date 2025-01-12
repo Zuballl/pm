@@ -24,7 +24,6 @@ const SlackModal = ({ active, handleModal, projectId, token, setErrorMessage }) 
       <div className="modal-card">
         <header className="modal-card-head">
           <p className="modal-card-title">Connect Slack</p>
-          <button className="delete" aria-label="close" onClick={handleModal}></button>
         </header>
         <section className="modal-card-body">
           <div className="field">

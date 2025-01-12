@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-
 import ErrorMessage from "../common/ErrorMessage";
 import { UserContext } from "../../context/UserContext";
 
@@ -9,35 +8,28 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [, setToken] = useContext(UserContext);
 
-
-
-
-
-
   const submitLogin = async () => {
-    const formData = new URLSearchParams();
-    formData.append("username", username);
-    formData.append("password", password);
-  
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString(),
-    };
-  
-    const response = await fetch("/api/token", requestOptions);
-    const data = await response.json();
-  
-    if (!response.ok) {
-      setErrorMessage(data.detail || "Login failed");
-    } else {
-      setToken(data.access_token);
+    try {
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
+
+      const response = await fetch("/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString(),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.detail || "Login failed");
+      } else {
+        setToken(data.access_token);
+      }
+    } catch (err) {
+      setErrorMessage("An error occurred while logging in.");
     }
   };
-
-
-
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -52,7 +44,7 @@ const Login = () => {
           <label className="label">Username</label>
           <div className="control">
             <input
-              type="username"
+              type="text"
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

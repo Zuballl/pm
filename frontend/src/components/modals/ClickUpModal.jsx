@@ -21,40 +21,38 @@ const ClickUpModal = ({ active, handleModal, projectId, setErrorMessage, token }
     <div className={`modal ${active ? "is-active" : ""}`}>
       <div className="modal-background" onClick={handleModal}></div>
       <div className="modal-card">
-        <header className="modal-card-head has-background-primary-light">
-          <h1 className="modal-card-title">Connect to ClickUp</h1>
+        <header className="modal-card-head">
+          <p className="modal-card-title">Connect to ClickUp</p>
         </header>
         <section className="modal-card-body">
-          <form>
-            <div className="field">
-              <label className="label">ClickUp Token</label>
-              <div className="control">
-                <input
-                  type="text"
-                  placeholder="Enter your ClickUp token"
-                  value={clickUpToken}
-                  onChange={(e) => setClickUpToken(e.target.value)}
-                  className="input"
-                  required
-                />
-              </div>
+          <div className="field">
+            <label className="label">ClickUp Token</label>
+            <div className="control">
+              <input
+                className="input"
+                type="text"
+                placeholder="Enter your ClickUp token"
+                value={clickUpToken}
+                onChange={(e) => setClickUpToken(e.target.value)}
+                required
+              />
             </div>
-            <div className="field">
-              <label className="label">ClickUp List ID</label>
-              <div className="control">
-                <input
-                  type="text"
-                  placeholder="Enter the ClickUp list ID"
-                  value={clickUpListId}
-                  onChange={(e) => setClickUpListId(e.target.value)}
-                  className="input"
-                  required
-                />
-              </div>
+          </div>
+          <div className="field">
+            <label className="label">ClickUp List ID</label>
+            <div className="control">
+              <input
+                className="input"
+                type="text"
+                placeholder="Enter the ClickUp list ID"
+                value={clickUpListId}
+                onChange={(e) => setClickUpListId(e.target.value)}
+                required
+              />
             </div>
-          </form>
+          </div>
         </section>
-        <footer className="modal-card-foot has-background-primary-light">
+        <footer className="modal-card-foot">
           <button className="button is-primary" onClick={handleConnect}>
             Connect
           </button>

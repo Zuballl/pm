@@ -1,181 +1,110 @@
 import React, { useEffect, useState } from "react";
 
 const ProjectModal = ({ active, handleModal, token, id, setErrorMessage }) => {
-  const [name, setName] = useState("");
-  const [department, setDepartment] = useState("");
-  const [client, setClient] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    department: "",
+    client: "",
+    deadline: "",
+    description: "",
+  });
+
+  const { name, department, client, deadline, description } = formData;
 
   useEffect(() => {
     const getProject = async () => {
-      const requestOptions = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      };
-      const response = await fetch(`/api/projects/${id}`, requestOptions);
-
-      if (!response.ok) {
-        setErrorMessage("Could not get the project");
-      } else {
+      try {
+        const response = await fetch(`/api/projects/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error("Could not get the project");
         const data = await response.json();
-        setName(data.name);
-        setDepartment(data.department);
-        setClient(data.client);
-        setDeadline(data.deadline);
-        setDescription(data.description);
+        setFormData(data);
+      } catch (err) {
+        setErrorMessage(err.message);
       }
     };
 
-    if (id) {
-      getProject();
-    }
+    if (id) getProject();
   }, [id, token]);
 
-  const cleanFormData = () => {
-    setName("");
-    setDepartment("");
-    setClient("");
-    setDeadline("");
-    setDescription("");
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleCreateProject = async (e) => {
+  const handleSubmit = async (e, method) => {
     e.preventDefault();
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      body: JSON.stringify({
-        name: name,
-        department: department,
-        client: client,
-        deadline: deadline,
-        description: description,
-      }),
-    };
-    const response = await fetch("/api/projects", requestOptions);
-    if (!response.ok) {
-      setErrorMessage("Something went wrong when creating project");
-    } else {
+    try {
+      const endpoint = id ? `/api/projects/${id}` : "/api/projects";
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error(`Failed to ${id ? "update" : "create"} project`);
       handleModal();
-      cleanFormData();
-    }
-  };
-
-  const handleUpdateProject = async (e) => {
-    e.preventDefault();
-    const requestOptions = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      body: JSON.stringify({
-        name: name,
-        department: department,
-        client: client,
-        deadline: deadline,
-        description: description,
-      }),
-    };
-    const response = await fetch(`/api/projects/${id}`, requestOptions);
-    if (!response.ok) {
-      setErrorMessage("Something went wrong when updating project");
-    } else {
-      handleModal();
-      cleanFormData();
+      setFormData({ name: "", department: "", client: "", deadline: "", description: "" });
+    } catch (err) {
+      setErrorMessage(err.message);
     }
   };
 
   return (
-    <div className={`modal ${active && "is-active"}`}>
+    <div className={`modal ${active ? "is-active" : ""}`}>
       <div className="modal-background" onClick={handleModal}></div>
       <div className="modal-card">
-        <header className="modal-card-head has-background-primary-light">
-          <h1 className="modal-card-title">
-            {id ? "Update Project" : "Create Project"}
-          </h1>
+        <header className="modal-card-head">
+          <p className="modal-card-title">{id ? "Update Project" : "Create Project"}</p>
         </header>
         <section className="modal-card-body">
           <form>
-            <div className="field">
-              <label className="label">Name</label>
-              <div className="control">
-                <input
-                  type="text"
-                  placeholder="Enter name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="input"
-                  required
-                />
+            {["name", "department", "client", "deadline"].map((field) => (
+              <div className="field" key={field}>
+                <label className="label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                <div className="control">
+                  <input
+                    type={field === "deadline" ? "date" : "text"}
+                    name={field}
+                    placeholder={`Enter ${field}`}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    className="input"
+                    required={field !== "client"}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="field">
-              <label className="label">Department</label>
-              <div className="control">
-                <input
-                  type="text"
-                  placeholder="Enter department"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  className="input"
-                  required
-                />
-              </div>
-            </div>
-            <div className="field">
-              <label className="label">Client</label>
-              <div className="control">
-                <input
-                  type="text"
-                  placeholder="Enter client"
-                  value={client}
-                  onChange={(e) => setClient(e.target.value)}
-                  className="input"
-                />
-              </div>
-            </div>
-            <div className="field">
-              <label className="label">Deadline</label>
-              <div className="control">
-                <input
-                  type="date"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
-                  className="input"
-                />
-              </div>
-            </div>
+            ))}
             <div className="field">
               <label className="label">Description</label>
               <div className="control">
                 <textarea
+                  name="description"
                   placeholder="Enter description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={handleChange}
                   className="textarea"
                 />
               </div>
             </div>
           </form>
         </section>
-        <footer className="modal-card-foot has-background-primary-light">
-          {id ? (
-            <button className="button is-info" onClick={handleUpdateProject}>
-              Update
-            </button>
-          ) : (
-            <button className="button is-primary" onClick={handleCreateProject}>
-              Create
-            </button>
-          )}
+        <footer className="modal-card-foot">
+          <button
+            className="button is-primary"
+            onClick={(e) => handleSubmit(e, id ? "PUT" : "POST")}
+          >
+            {id ? "Update" : "Create"}
+          </button>
           <button className="button" onClick={handleModal}>
             Cancel
           </button>
