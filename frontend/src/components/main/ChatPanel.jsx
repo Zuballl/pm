@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchGPTResponse, fetchChats, fetchProjects } from "../utils/api";
+import { fetchGPTResponse, fetchChats, fetchProjects } from "../../utils/api";
 import ReactMarkdown from "react-markdown";
 
 const ChatPanel = ({ token, userId }) => {

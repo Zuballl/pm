@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
-import { UserContext } from "../context/UserContext";
-import ErrorMessage from "./ErrorMessage";
+import { UserContext } from "../../context/UserContext";
+import ErrorMessage from "../common/ErrorMessage";
 
 const Register = () => {
   const [username, setUsername] = useState("");

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import Register from "./components/Register";
-import Login from "./components/Login";
-import Header from "./components/Header";
-import Table from "./components/Table";
-import ChatPanel from "./components/ChatPanel";
+import Register from "./components/auth/Register";
+import Login from "./components/auth/Login";
+import Header from "./components/common/Header";
+import Table from "./components/main/Table";
+import ChatPanel from "./components/main/ChatPanel";
 import { UserContext } from "./context/UserContext";
 
 const App = () => {

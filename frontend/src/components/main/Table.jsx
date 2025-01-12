@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { format } from "date-fns";
 
-import ErrorMessage from "./ErrorMessage";
-import ProjectModal from "./ProjectModal";
-import ClickUpModal from "./ClickUpModal";
-import SlackModal from "./SlackModal"; // Import Slack Modal
-import { UserContext } from "../context/UserContext";
+import ErrorMessage from "../common/ErrorMessage";
+import ProjectModal from "../modals/ProjectModal";
+import ClickUpModal from "../modals/ClickUpModal";
+import SlackModal from "../modals/SlackModal";
+import { UserContext } from "../../context/UserContext";
 
 const Table = () => {
   const [token] = useContext(UserContext);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { configureSlack, getSlackOAuthUrl } from "../utils/api";
+import { configureSlack, getSlackOAuthUrl } from "../../utils/api";
 
 const SlackModal = ({ active, handleModal, projectId, token, setErrorMessage }) => {
   const [clientId, setClientId] = useState("");

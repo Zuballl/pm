@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { connectClickUp } from "../utils/api";
+import { connectClickUp } from "../../utils/api";
 
 const ClickUpModal = ({ active, handleModal, projectId, setErrorMessage, token }) => {
   const [clickUpToken, setClickUpToken] = useState("");
