@@ -27,7 +27,6 @@ class Project(database.Base):
     owner_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
     clickup_integration = orm.relationship("ClickUpIntegration", back_populates="project", uselist=False, lazy="joined")
     slack_integration = orm.relationship("SlackIntegration", back_populates="project", uselist=False)
-    google_drive_credentials = orm.relationship("GoogleDriveIntegration", back_populates="project", uselist=False)
 
     name = sql.Column(sql.String, index=True)
     department = sql.Column(sql.String, index=True)
@@ -76,15 +75,3 @@ class SlackIntegration(database.Base):
 
     project_id = sql.Column(sql.Integer, sql.ForeignKey("projects.id"), nullable=False)
     project = orm.relationship("Project", back_populates="slack_integration")
-
-
-
-class GoogleDriveIntegration(database.Base):
-    __tablename__ = "google_drive_credentials"
-    id = sql.Column(sql.Integer, primary_key=True, index=True)
-    project_id = sql.Column(sql.Integer, sql.ForeignKey("projects.id"), nullable=False)
-    client_id = sql.Column(sql.String, nullable=False)
-    client_secret = sql.Column(sql.String, nullable=False)
-    access_token = sql.Column(sql.String, nullable=True)
-
-    project = orm.relationship("Project", back_populates="google_drive_credentials")

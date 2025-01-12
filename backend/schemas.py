@@ -111,34 +111,6 @@ class SlackIntegrationResponse(SlackIntegrationBase):
 
 
 
-
-
-
-class GoogleDriveBase(pydantic.BaseModel):
-    client_id: str
-    client_secret: str
-    token: str
-
-class GoogleDriveCreate(GoogleDriveBase):
-    pass
-
-class GoogleDriveResponse(GoogleDriveBase):
-    id: int
-    project_id: int
-
-    class Config:
-        from_attributes = True
-
-
-
-
-    
-
-
-
-
-
-
 class ProjectBase(pydantic.BaseModel):
     name: str
     department: str
