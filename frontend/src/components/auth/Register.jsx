@@ -95,7 +95,7 @@ const Register = () => {
         {/* Error Message */}
         <ErrorMessage message={errorMessage} />
         <br />
-        <button className="button is-primary is-fullwidth" type="submit">
+        <button className="button is-primary" type="submit">
           Register
         </button>
       </form>

@@ -166,6 +166,14 @@ const Table = () => {
                   >
                     Update
                   </button>
+                  
+                  <button
+                    className="button mr-2 is-danger is-light"
+                    onClick={() => handleDelete(project.id)}
+                  >
+                    Delete
+                  </button>
+                  
                   <button
                     className="button mr-2 is-primary is-light"
                     onClick={() => handleConnectClickUp(project.id)}
@@ -177,12 +185,6 @@ const Table = () => {
                     onClick={() => handleConnectSlack(project.id)}
                   >
                     Connect Slack
-                  </button>
-                  <button
-                    className="button mr-2 is-danger is-light"
-                    onClick={() => handleDelete(project.id)}
-                  >
-                    Delete
                   </button>
                 </td>
               </tr>

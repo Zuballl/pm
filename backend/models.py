@@ -43,7 +43,6 @@ class Project(database.Base):
 
 class ChatHistory(database.Base):
     __tablename__ = "chat_history"
-
     id = sql.Column(sql.Integer, primary_key=True, index=True)
     user_id = sql.Column(sql.Integer, sql.ForeignKey("users.id"))
     project_id = sql.Column(sql.Integer, nullable=True)  
